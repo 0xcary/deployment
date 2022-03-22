@@ -1,0 +1,79 @@
+@startuml
+
+title To be a validator
+autonumber
+
+participant candidate
+participant KCCAdmin
+participant staker
+participant proposal
+participant manager
+participant validator
+participant votePool
+
+candidate --> KCCAdmin : KYC
+KCCAdmin -[#0000FF]-> candidate : 收到KYC请求
+autonumber
+KCCAdmin --> proposal : create proposal
+activate proposal
+proposal --> KCCAdmin : create proposal ok
+KCCAdmin -[#0000FF]-> candidate : proposal was created
+candidate -[#0000FF]-> validator : commit a request
+
+note left proposal
+time-bonded
+end note
+
+validator --> proposal : 当前validator\n针对proposal投票
+
+autonumber
+candidate --> proposal : 查询投票结果
+deactivate proposal
+proposal --> candidate : 投票结果
+
+
+note over candidate, votePool
+只有proposal通过的candidate才有权限
+end note
+
+autonumber
+candidate --> validator : 添加validator到candidate pool
+validator --> votePool : 创建votePool，并设置manager
+votePool --> candidate : 添加完成
+
+...
+autonumber
+note over KCCAdmin, votePool
+KCCAdmin也可以帮忙添加candidate到candidate pool里面并创建对应的vote pool
+end note
+KCCAdmin --> validator : 添加validator到candidate pool
+validator --> votePool : 创建votePool，并设置manager
+votePool --> KCCAdmin : 添加完成
+
+...
+
+... staking ...
+autonumber
+note over validator, votePool
+成为candidate后，需要质押一定数量的token才有机会成为validator
+end note
+
+validator --> votePool : staking coins at least: 50k(10~50k)
+votePool --> validator : sorting by votes
+activate validator
+validator --> validator : sorting
+votePool --> validator : staking ok
+deactivate validator
+... staking ...
+
+
+autonumber
+... set commission rate ...
+note over manager, votePool
+only manager can do it
+end note
+manager --> votePool : set commission rate
+votePool --> manager : set commission rate ok
+... set commission rate ...
+
+@enduml

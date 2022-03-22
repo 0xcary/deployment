@@ -1,0 +1,77 @@
+@startuml
+!pragma teoz true
+
+title Staker
+autonumber
+
+
+participant staker
+participant votePool
+participant validator
+participant PoSA
+participant reservePool
+
+... voting ...
+staker --> votePool : 针对特定的validator的votePool进行投票
+votePool --> validator : sorting by votes
+activate validator
+validator --> validator : sorting
+validator --> votePool : sorting end
+deactivate validator
+votePool --> staker : 投票成功
+... voting ...
+|||
+autonumber 1
+... mining ...
+note over votePool, reservePool
+staker所投票的节点必须要成为validator(top 29)并且有出块之后才有收益
+end note
+PoSA --> validator : get top validators
+validator --> PoSA : get top validators ok
+PoSA --> reservePool : send block rewards
+reservePool --> PoSA : send block rewards ok
+PoSA --> reservePool : get block rewards
+reservePool --> PoSA : get block rewards ok
+PoSA --> votePool : distribute block rewards
+votePool --> PoSA : distribute block rewards ok
+... mining ...
+|||
+
+autonumber 1
+... claim ...
+staker --> votePool : claim staking rewards
+
+votePool --> staker : send staking rewards to staker
+... claim ...
+|||
+autonumber 1
+... redeem ...
+
+staker --> votePool : redeem staking coins
+votePool --> validator : sorting by votes
+activate validator
+validator --> validator : sorting
+validator --> votePool : sorting end
+deactivate validator
+
+votePool --> staker : distribute rewards
+votePool --> votePool : update unlocking time
+
+{start} votePool --> staker : redeem ok, and unlocking time: 3 days
+staker --> staker : 等待锁定期结束
+... redeem ...
+||45|
+... withdraw ...
+autonumber
+{end} staker --> votePool : withdraw staking coins
+
+votePool --> staker : withdraw ok
+
+{start} <-> {end} : at least 3 days
+... withdraw ...
+
+
+
+
+
+@enduml

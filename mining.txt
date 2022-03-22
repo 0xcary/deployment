@@ -1,0 +1,54 @@
+@startuml
+
+autonumber
+
+title Mining
+
+participant validator
+participant miner
+participant PoSA
+participant punish
+participant reservePool
+participant votePool
+
+validator --> validator : elect top 29 validators at epoch N
+
+autonumber
+note over PoSA, validator
+在N+1个epoch的第一个块去获取第N个epoch选出的top validators
+end note
+
+miner --> PoSA : 构建新区块
+
+
+PoSA --> PoSA : validation
+
+PoSA --> punish : out of turn
+activate punish
+punish --> punish : 不存在则添加\n miss block数量增加\n 判断阈值并实施惩罚
+punish --> votePool : 惩罚
+votePool --> punish : 惩罚完成
+punish --> PoSA :
+deactivate punish
+
+PoSA --> reservePool : send block's fee
+reservePool --> PoSA : send block's fee ok
+PoSA --> reservePool : get block rewards
+reservePool --> PoSA : get block rewards ok
+
+PoSA --> votePool : distribute block rewards
+votePool --> PoSA : distribute block rewards ok
+note over miner, PoSA
+update validator for next epoch
+at end of current epoch
+end note
+
+PoSA --> validator : get top validators at epoch N+1
+validator --> PoSA : top validators ready for validate block
+
+PoSA --> miner : mined
+
+
+
+
+@enduml
